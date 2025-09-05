@@ -13,8 +13,9 @@ services:
     image: ghcr.io/zaproxy/zaproxy:stable
     depends_on:
       - app
+    user: "0:0"
     entrypoint: ["zap-baseline.py", "-t", "http://app:5000", "-J", "report_json.json", "-w", "report_md.md", "-r", "report_html.html"]
     networks:
       - default
     volumes:
-      - ./zap-reports:/zap/wrk 
+      - ./zap-reports:/zap/wrk
