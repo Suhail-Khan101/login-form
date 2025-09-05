@@ -57,7 +57,19 @@ def create_app(test_config=None):
     # a simple page that says hello
     @app.route('/hello')
     def hello():
-        return 'Hello, World!'
+        from flask import make_response
+        response = make_response('Hello, World!')
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        return response
+
+    @app.route('/')
+    def index():
+        from flask import render_template, make_response
+        resp = make_response(render_template('index.html'))
+        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        resp.headers['Pragma'] = 'no-cache'
+        return resp
 
     from . import db
     db.init_app(app)
@@ -96,4 +108,11 @@ def create_app(test_config=None):
         resp.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
         return resp
 
+    # Set cache-control headers for static files
+    @app.after_request
+    def add_static_cache_control(response):
+        if response.direct_passthrough and response.status_code == 200 and response.headers.get('Content-Type', '').startswith('text/'):
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+        return response
     return app
