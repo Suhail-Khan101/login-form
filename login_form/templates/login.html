@@ -16,12 +16,12 @@
   {% endfor %}
   <section class="content">
     <form method="post">
-      {{ csrf_token() }}
+      {{ form.csrf_token }}
       <label for="username">Username</label>
-      <input name="username" id="username" required>
+      {{ form.username(id='username') }}
       <label for="password">Password</label>
-      <input type="password" name="password" id="password" required>
-      <input type="submit" value="Log In">
+      {{ form.password(id='password') }}
+      {{ form.submit() }}
     </form>
   </section>  
 </body>

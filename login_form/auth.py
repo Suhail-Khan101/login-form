@@ -3,6 +3,7 @@ import functools
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
+from login_form.forms import LoginForm, RegisterForm
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from login_form.db import get_db
@@ -16,43 +17,35 @@ def index():
 
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
+    form = RegisterForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
         error = None
-
         if not username:
             error = 'Username is required.'
-
         if error is None:
             User.create(username, password)
             return redirect(url_for('auth.login'))
-
         flash(error)
-
-    return render_template('register.html')
+    return render_template('register.html', form=form)
 
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
+    form = LoginForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
         error = None
         user = User.find_with_credentials(username, password)
-
         if user is None:
             error = 'Incorrect username or password.'
-
         if error is None:
             session.clear()
             session['user_id'] = user.id
             return redirect(url_for('auth.index'))
-
         flash(error)
-
-    return render_template('login.html')
+    return render_template('login.html', form=form)
 
 @bp.before_app_request
 def load_logged_in_user():
