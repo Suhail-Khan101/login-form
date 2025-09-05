@@ -13,7 +13,7 @@ services:
     depends_on:
       - app
     user: "0:0"
-    entrypoint: ["zap-baseline.py", "-t", "http://app:5000", "-J", "report_json.json", "-w", "report_md.md", "-r", "report_html.html"]
+    entrypoint: ["zap-baseline.py", "-t", "http://app:5000", "-J", "report_json.json", "-w", "report_md.md", "-r", "report_html.html", "-I"]
     networks:
       - default
     volumes:
