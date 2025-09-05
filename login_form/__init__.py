@@ -5,16 +5,14 @@ def create_app(test_config=None):
 
     # Remove 'Server' header for all responses, including static files
     from werkzeug.middleware.proxy_fix import ProxyFix
-
+    # create and configure the app
+    app = Flask(__name__, instance_relative_config=True)
     app.wsgi_app = ProxyFix(app.wsgi_app)
-
     @app.after_request
     def remove_server_header(response):
         if 'Server' in response.headers:
             del response.headers['Server']
         return response
-    # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY=os.environ.get('SECRET_KEY', 'dev'),
         DATABASE=os.path.join(app.instance_path, 'login_form.sqlite'),
