@@ -86,10 +86,7 @@ def create_app(test_config=None):
     @app.route('/')
     def index():
         from flask import render_template, make_response
-        resp = make_response(render_template('index.html'))
-        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-        resp.headers['Pragma'] = 'no-cache'
-        return resp
+        return make_response(render_template('index.html'), 200)
 
     from . import db
     db.init_app(app)
@@ -103,20 +100,12 @@ def create_app(test_config=None):
     # 404 error handler with cache-control
     @app.errorhandler(404)
     def not_found_error(error):
-        response = app.make_response('Not Found')
-        response.status_code = 404
-        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-        response.headers['Pragma'] = 'no-cache'
-        response.headers['Expires'] = '0'
-        return response
+        from flask import make_response
+        return make_response('Not Found', 404)
 
     # 400 error handler with cache-control
     @app.errorhandler(400)
     def bad_request_error(error):
-        response = app.make_response('Bad Request')
-        response.status_code = 400
-        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-        response.headers['Pragma'] = 'no-cache'
-        response.headers['Expires'] = '0'
-        return response
+        from flask import make_response
+        return make_response('Bad Request', 400)
     return app
