@@ -2,6 +2,8 @@ import os
 from flask import Flask
 
 def create_app(test_config=None):
+    from flask_wtf import CSRFProtect
+    csrf = CSRFProtect(app)
 
     # Remove 'Server' header for all responses, including static files
     from werkzeug.middleware.proxy_fix import ProxyFix
@@ -9,9 +11,16 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.wsgi_app = ProxyFix(app.wsgi_app)
     @app.after_request
-    def remove_server_header(response):
+    def secure_headers(response):
+        # Remove Server header
         if 'Server' in response.headers:
             del response.headers['Server']
+        # Add cache-control
+        response.headers['Cache-Control'] = 'no-store'
+        # Add Spectre-mitigation headers
+        response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+        response.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
+        response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
         return response
     app.config.from_mapping(
         SECRET_KEY=os.environ.get('SECRET_KEY', 'dev'),
