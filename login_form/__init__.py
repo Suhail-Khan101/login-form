@@ -22,18 +22,38 @@ def create_app(test_config=None):
                 return start_response(status, headers, exc_info)
             return self.app(environ, custom_start_response)
     app.wsgi_app = RemoveServerHeaderMiddleware(app.wsgi_app)
+    # Unified after_request for all security and cache-control headers
     @app.after_request
-    def secure_headers(response):
-        # Remove Server header
-        if 'Server' in response.headers:
-            del response.headers['Server']
-        # Add cache-control
-        response.headers['Cache-Control'] = 'no-store'
-        # Add Spectre-mitigation headers
-        response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
-        response.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
-        response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
-        return response
+    def add_security_and_cache_headers(resp):
+        # Content Security Policy (CSP) with fallback
+        resp.headers['Content-Security-Policy'] = (
+            "default-src 'self'; "
+            "script-src 'self'; "
+            "object-src 'none'; "
+            "base-uri 'self'; "
+            "frame-ancestors 'none'; "
+            "img-src 'self' data:; "
+            "style-src 'self'; "
+            "font-src 'self'; "
+            "form-action 'self'; "
+            "upgrade-insecure-requests; "
+            "block-all-mixed-content; "
+        )
+        # Remove Server header to prevent version disclosure
+        if 'Server' in resp.headers:
+            del resp.headers['Server']
+        # Cache control headers for all responses
+        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        resp.headers['Pragma'] = 'no-cache'
+        resp.headers['Expires'] = '0'
+        # Other security headers
+        resp.headers['X-Frame-Options'] = 'DENY'
+        resp.headers['X-Content-Type-Options'] = 'nosniff'
+        resp.headers['Permissions-Policy'] = 'geolocation=(), microphone=()'
+        resp.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+        resp.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
+        resp.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
+        return resp
     app.config.from_mapping(
         SECRET_KEY=os.environ.get('SECRET_KEY', 'dev'),
         DATABASE=os.path.join(app.instance_path, 'login_form.sqlite'),
@@ -78,41 +98,15 @@ def create_app(test_config=None):
     app.register_blueprint(auth.bp)
 
 
-    @app.after_request
-    def add_security_headers(resp):
-        # Content Security Policy (CSP) with fallback
-        resp.headers['Content-Security-Policy'] = (
-            "default-src 'self'; "
-            "script-src 'self'; "
-            "object-src 'none'; "
-            "base-uri 'self'; "
-            "frame-ancestors 'none'; "
-            "img-src 'self' data:; "
-            "style-src 'self'; "
-            "font-src 'self'; "
-            "form-action 'self'; "
-            "upgrade-insecure-requests; "
-            "block-all-mixed-content; "
-        )
-        # Remove Server header to prevent version disclosure
-        if 'Server' in resp.headers:
-            del resp.headers['Server']
-        # Cache control headers
-        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-        resp.headers['Pragma'] = 'no-cache'
-        # Other security headers
-        resp.headers['X-Frame-Options'] = 'DENY'
-        resp.headers['X-Content-Type-Options'] = 'nosniff'
-        resp.headers['Permissions-Policy'] = 'geolocation=(), microphone=()'
-        resp.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
-        resp.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
-        return resp 
+    # Remove any duplicate after_request handlers above
 
-    # Set cache-control headers for static files
-    @app.after_request
-    def add_static_cache_control(response):
-        if response.direct_passthrough and response.status_code == 200 and response.headers.get('Content-Type', '').startswith('text/'):
-            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-            response.headers['Pragma'] = 'no-cache'
+    # 404 error handler with cache-control
+    @app.errorhandler(404)
+    def not_found_error(error):
+        response = app.make_response('Not Found')
+        response.status_code = 404
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
         return response
     return app
