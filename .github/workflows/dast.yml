@@ -19,6 +19,16 @@ jobs:
         run: |
           docker build --tag insecure-acebook:latest .
           docker run -d -p 5000:5000 insecure-acebook
+      - name: Wait for app to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:5000 > /dev/null; then
+              echo "App is up!"
+              break
+            fi
+            echo "Waiting for app..."
+            sleep 2
+          done
       - name: OWASP ZAP
         uses: zaproxy/action-baseline@v0.14.0
         with:
