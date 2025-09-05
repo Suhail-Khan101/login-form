@@ -33,19 +33,35 @@ def create_app(test_config=None):
     from . import auth
     app.register_blueprint(auth.bp)
 
+
     @app.after_request
     def add_security_headers(resp):
-        resp.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; img-src 'self' data:;"
+        # Content Security Policy (CSP) with fallback
+        resp.headers['Content-Security-Policy'] = (
+            "default-src 'self'; "
+            "script-src 'self'; "
+            "object-src 'none'; "
+            "base-uri 'self'; "
+            "frame-ancestors 'none'; "
+            "img-src 'self' data:; "
+            "style-src 'self'; "
+            "font-src 'self'; "
+            "form-action 'self'; "
+            "upgrade-insecure-requests; "
+            "block-all-mixed-content; "
+        )
+        # Remove Server header to prevent version disclosure
+        if 'Server' in resp.headers:
+            del resp.headers['Server']
+        # Cache control headers
+        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        resp.headers['Pragma'] = 'no-cache'
+        # Other security headers
         resp.headers['X-Frame-Options'] = 'DENY'
         resp.headers['X-Content-Type-Options'] = 'nosniff'
         resp.headers['Permissions-Policy'] = 'geolocation=(), microphone=()'
-        resp.headers['Cache-Control'] = 'no-store'
-        resp.headers['Pragma'] = 'no-cache'
         resp.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
         resp.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
-        # Remove Server header if Werkzeug adds it
-        if 'Server' in resp.headers:
-            del resp.headers['Server']
         return resp
 
     return app
