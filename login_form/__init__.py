@@ -109,20 +109,20 @@ def create_app(test_config=None):
     # 404 error handler with cache-control
     @app.errorhandler(404)
     def not_found_error(error):
-    from flask import make_response
-    response = make_response('Not Found', 404)
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    return response
+        from flask import make_response
+        response = make_response('Not Found', 404)
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
 
     # 400 error handler with cache-control
     @app.errorhandler(400)
     def bad_request_error(error):
-    from flask import make_response
-    response = make_response('Bad Request', 400)
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    return response
+        from flask import make_response
+        response = make_response('Bad Request', 400)
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
     return app 
