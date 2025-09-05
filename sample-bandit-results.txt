@@ -1,0 +1,24 @@
+Test results:
+>> Issue: [B106:hardcoded_password_funcarg] Possible hardcoded password: 'super_secret_key'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.5/plugins/b106_hardcoded_password_funcarg.html
+   Location: ./login_form/__init__.py:7:4
+6           app = Flask(__name__, instance_relative_config=True)
+7           app.config.from_mapping(
+8               SECRET_KEY='super_secret_key',
+9               DATABASE=os.path.join(app.instance_path, 'login_form.sqlite'),
+10          )
+11
+
+--------------------------------------------------
+>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+   Severity: Medium   Confidence: Medium
+   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
+   More Info: https://bandit.readthedocs.io/en/1.7.5/plugins/b608_hardcoded_sql_expressions.html
+   Location: ./login_form/user.py:10:6
+9           db.execute(
+10            "INSERT INTO user (username, password) VALUES ('"+username+"', '"+password+"')",
+11            ()
+
+--------------------------------------------------

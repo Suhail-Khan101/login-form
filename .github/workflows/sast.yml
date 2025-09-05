@@ -1,0 +1,54 @@
+name: SAST
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  bandit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Bandit - Security Issues in Python code
+        uses: mdegis/bandit-action@v1.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: "."
+          exit_zero: true
+
+  semgrep:
+    runs-on: ubuntu-latest
+    # Skip any PR created by dependabot to avoid permission issues
+    if: (github.actor != 'dependabot[bot]')
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Semgrep - Lightweight SAST to find bugs and enfource code standards
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >- # more at semgrep.dev/explore
+            p/security-audit
+            p/secrets
+
+  depcheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Depcheck tool
+        uses: dependency-check/Dependency-Check_Action@main
+        id: Depcheck
+        with:
+          project: 'insecure-acebook'
+          path: '.'
+          format: 'HTML'
+          args: >
+            --failOnCVSS 7
+            --enableRetired
+      - name: Upload Test results
+        uses: actions/upload-artifact@main
+        with:
+           name: Depcheck report
+           path: ${{github.workspace}}/reports

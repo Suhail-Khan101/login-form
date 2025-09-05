@@ -1,0 +1,30 @@
+name: DAST
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  dast:
+    name: OWASP ZAP BASELINE SCAN
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+      - name: Building Docker Insecure Acebook Image
+        run: docker build --tag insecure-acebook:latest .
+      - name: Launching the Insecure Acebook app
+        run: docker run -d -p 5000:5000 insecure-acebook
+
+      - name: OWASP ZAP
+        ### Swap the actions used if you want a more comprehensive DAST analysis of your app :)
+        # uses: zaproxy/action-full-scan@v0.3.0
+        uses: zaproxy/action-baseline@v0.6.1
+        with:
+          target: "http://localhost:5000"
+          fail_action: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue_title: DAST Security Tests
