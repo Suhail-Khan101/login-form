@@ -3,12 +3,13 @@ from flask import Flask
 
 def create_app(test_config=None):
     from flask_wtf import CSRFProtect
-    csrf = CSRFProtect(app)
+    csrf = CSRFProtect()
 
     # Remove 'Server' header for all responses, including static files
     from werkzeug.middleware.proxy_fix import ProxyFix
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
+    csrf.init_app(app)
     app.wsgi_app = ProxyFix(app.wsgi_app)
     @app.after_request
     def secure_headers(response):
