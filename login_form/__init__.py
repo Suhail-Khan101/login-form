@@ -106,7 +106,7 @@ def create_app(test_config=None):
         resp.headers['Permissions-Policy'] = 'geolocation=(), microphone=()'
         resp.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
         resp.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
-        return resp
+        return resp 
 
     # Set cache-control headers for static files
     @app.after_request
