@@ -2,20 +2,6 @@ import os
 from flask import Flask
 
 def create_app(test_config=None):
-    @app.after_request
-    def add_security_headers(resp):
-        resp.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; img-src 'self' data:;"
-        resp.headers['X-Frame-Options'] = 'DENY'
-        resp.headers['X-Content-Type-Options'] = 'nosniff'
-        resp.headers['Permissions-Policy'] = 'geolocation=(), microphone=()'
-        resp.headers['Cache-Control'] = 'no-store'
-        resp.headers['Pragma'] = 'no-cache'
-        resp.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
-        resp.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
-        # Remove Server header if Werkzeug adds it
-        if 'Server' in resp.headers:
-            del resp.headers['Server']
-        return resp
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
@@ -49,7 +35,17 @@ def create_app(test_config=None):
 
     @app.after_request
     def add_security_headers(resp):
-        resp.headers['Content-Security-Policy']='default-src \'self\''
+        resp.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; img-src 'self' data:;"
+        resp.headers['X-Frame-Options'] = 'DENY'
+        resp.headers['X-Content-Type-Options'] = 'nosniff'
+        resp.headers['Permissions-Policy'] = 'geolocation=(), microphone=()'
+        resp.headers['Cache-Control'] = 'no-store'
+        resp.headers['Pragma'] = 'no-cache'
+        resp.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+        resp.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
+        # Remove Server header if Werkzeug adds it
+        if 'Server' in resp.headers:
+            del resp.headers['Server']
         return resp
 
     return app
