@@ -109,4 +109,14 @@ def create_app(test_config=None):
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '0'
         return response
+
+    # 400 error handler with cache-control
+    @app.errorhandler(400)
+    def bad_request_error(error):
+        response = app.make_response('Bad Request')
+        response.status_code = 400
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
     return app
