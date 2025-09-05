@@ -9,6 +9,7 @@ setup(
     install_requires=[
         'flask',
         'seleniumbase',
-        'faker'
+        'faker',
+        'Flask-WTF'
     ],
 )
