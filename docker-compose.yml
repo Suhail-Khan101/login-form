@@ -17,4 +17,4 @@ services:
     networks:
       - default
     volumes:
-      - ./zap-reports:/zap/wrk
+      - ./zap-reports:/zap/wrk 
