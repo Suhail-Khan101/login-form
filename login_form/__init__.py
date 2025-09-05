@@ -11,6 +11,17 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     csrf.init_app(app)
     app.wsgi_app = ProxyFix(app.wsgi_app)
+    # Remove Server header from all responses (including static and errors)
+    from werkzeug.middleware.http_proxy import ProxyMiddleware
+    class RemoveServerHeaderMiddleware:
+        def __init__(self, app):
+            self.app = app
+        def __call__(self, environ, start_response):
+            def custom_start_response(status, headers, exc_info=None):
+                headers = [(k, v) for (k, v) in headers if k.lower() != 'server']
+                return start_response(status, headers, exc_info)
+            return self.app(environ, custom_start_response)
+    app.wsgi_app = RemoveServerHeaderMiddleware(app.wsgi_app)
     @app.after_request
     def secure_headers(response):
         # Remove Server header
