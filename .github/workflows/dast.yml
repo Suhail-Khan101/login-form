@@ -15,24 +15,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Build and run the app
+      - name: Run DAST scan with Docker Compose
         run: |
-          docker build --tag insecure-acebook:latest .
-          docker run -d -p 5000:5000 insecure-acebook
-      - name: Wait for app to be ready
-        run: |
-          for i in {1..30}; do
-            if curl -s http://localhost:5000 > /dev/null; then
-              echo "App is up!"
-              break
-            fi
-            echo "Waiting for app..."
-            sleep 2
-          done
-      - name: OWASP ZAP
-        uses: zaproxy/action-baseline@v0.14.0
-        with:
-          target: "http://localhost:5000"
-          fail_action: false
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue_title: DAST Security Tests
+          docker-compose up --abort-on-container-exit

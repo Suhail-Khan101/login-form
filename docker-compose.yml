@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=login_form
+      - FLASK_ENV=production
+      - SECRET_KEY=dev
+    command: flask run --host=0.0.0.0
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    depends_on:
+      - app
+    entrypoint: ["zap-baseline.py", "-t", "http://app:5000", "-J", "report_json.json", "-w", "report_md.md", "-r", "report_html.html"]
+    networks:
+      - default
+    volumes:
+      - ./zap-reports:/zap/wrk
