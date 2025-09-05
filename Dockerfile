@@ -10,7 +10,9 @@ RUN python3 -m venv venv
 RUN . venv/bin/activate
 RUN pip3 install -e .
 
-RUN chmod +x scripts/*
+
+# Ensure zap-reports exists and is world-writable for ZAP
+RUN chmod +x scripts/* && mkdir -p zap-reports && chmod 777 zap-reports
 
 EXPOSE 5000
 
