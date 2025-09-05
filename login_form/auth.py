@@ -28,7 +28,12 @@ def register():
             User.create(username, password)
             return redirect(url_for('auth.login'))
         flash(error)
-    return render_template('register.html', form=form)
+    resp = render_template('register.html', form=form)
+    from flask import make_response
+    response = make_response(resp)
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    return response
 
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
@@ -45,7 +50,12 @@ def login():
             session['user_id'] = user.id
             return redirect(url_for('auth.index'))
         flash(error)
-    return render_template('login.html', form=form)
+    resp = render_template('login.html', form=form)
+    from flask import make_response
+    response = make_response(resp)
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    return response
 
 @bp.before_app_request
 def load_logged_in_user():
