@@ -26,6 +26,8 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY=os.environ.get('SECRET_KEY', 'dev'),
         DATABASE=os.path.join(app.instance_path, 'login_form.sqlite'),
+        SESSION_COOKIE_SAMESITE='Lax',
+        SESSION_COOKIE_SECURE=True,
     )
 
     if test_config is None:
