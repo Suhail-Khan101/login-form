@@ -10,6 +10,7 @@ setup(
         'flask',
         'seleniumbase',
         'faker',
-        'Flask-WTF'
+        'Flask-WTF',
+        'gunicorn'
     ],
 )

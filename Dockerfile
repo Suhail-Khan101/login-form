@@ -16,4 +16,4 @@ RUN chmod +x scripts/* && mkdir -p zap-reports && chmod 777 zap-reports
 
 EXPOSE 5000
 
-CMD ["./scripts/entrypoint.sh"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "login_form:create_app()"]
