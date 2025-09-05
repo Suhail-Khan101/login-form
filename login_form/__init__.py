@@ -2,8 +2,10 @@ import os
 from flask import Flask
 
 def create_app(test_config=None):
+
     # Remove 'Server' header for all responses, including static files
     from werkzeug.middleware.proxy_fix import ProxyFix
+
     app.wsgi_app = ProxyFix(app.wsgi_app)
 
     @app.after_request
